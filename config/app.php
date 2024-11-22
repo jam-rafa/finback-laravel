@@ -1,5 +1,7 @@
 <?php
 
+use Barryvdh\Debugbar\ServiceProvider;
+
 return [
 
     /*
@@ -25,6 +27,15 @@ return [
     | services the application utilizes. Set this in your ".env" file.
     |
     */
+
+    'providers' => array_merge(
+        ServiceProvider::defaultProviders()->toArray(),
+        [
+            Barryvdh\Debugbar\ServiceProvider::class,
+        ]
+    ),
+
+
 
     'env' => env('APP_ENV', 'production'),
 

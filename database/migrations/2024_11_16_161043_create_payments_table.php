@@ -18,8 +18,9 @@ return new class extends Migration
             $table->float('installment_value'); // Cria a coluna 'installment_value' (FLOAT)
             $table->date('expiration_date'); // Cria a coluna 'expiration_date' (DATE)
             
-            // Define a chave estrangeira para 'movements_id'
+            // Define as chaves estrangeiras
             $table->foreignId('movements_id')->constrained('movements')->onDelete('cascade');
+            $table->foreignId('payment_type_id')->constrained('payment_types')->onDelete('cascade'); // Relação com payment_types
             
             $table->timestamps(); // Cria as colunas 'created_at' e 'updated_at'
         });

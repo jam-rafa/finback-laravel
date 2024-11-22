@@ -19,6 +19,7 @@ return new class extends Migration
             $table->float('value'); // Cria a coluna 'value' (FLOAT)
 
             // Define as chaves estrangeiras
+            $table->foreignId('account_id')->constrained('accounts')->onDelete('cascade');
             $table->foreignId('nature_id')->constrained('natures')->onDelete('cascade');
             $table->foreignId('payment_type_id')->constrained('payment_types')->onDelete('cascade');
             $table->foreignId('cost_center_id')->constrained('cost_centers')->onDelete('cascade');

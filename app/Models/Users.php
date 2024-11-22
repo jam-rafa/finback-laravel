@@ -2,14 +2,26 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Users extends Model
+class User extends Model
 {
-    // Em app/Models/User.php
-    // Em app/Models/Account.php
-    public function users()
+    use HasFactory;
+
+    protected $table = 'users';
+
+    protected $fillable = [
+        'username',
+        'password',
+        'email',
+        'cpf',
+        'cnpj',
+        'role_id',
+    ];
+
+    public function role()
     {
-        return $this->belongsToMany(User::class, 'users_accounts')->withTimestamps();
+        return $this->belongsTo(Role::class, 'role_id');
     }
 }

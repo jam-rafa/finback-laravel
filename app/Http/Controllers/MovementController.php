@@ -22,10 +22,11 @@ class MovementController extends Controller
             'date' => 'required|date',
             'cost_type' => 'required|string',
             'value' => 'required|numeric',
+            'installments' => 'numeric',
             'nature_id' => 'required|exists:natures,id',
             'payment_type_id' => 'required|exists:payment_types,id',
             'cost_center_id' => 'required|exists:cost_centers,id',
-            'account_id' => 'required|exists:account_id,id'
+            'account_id' => 'required|exists:account_id,id',
         ]);
 
         $movement = Movement::create($validatedData);

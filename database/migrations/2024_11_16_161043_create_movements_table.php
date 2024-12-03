@@ -17,7 +17,8 @@ return new class extends Migration
             $table->date('date'); // Cria a coluna 'date' (DATE)
             $table->string('cost_type'); // Cria a coluna 'cost_type' (STRING)
             $table->float('value'); // Cria a coluna 'value' (FLOAT)
-
+            $table->float('installments'); // Cria a coluna 'value' (FLOAT)
+            $table->string('moviment_type');
             // Define as chaves estrangeiras
             $table->foreignId('account_id')->constrained('accounts')->onDelete('cascade');
             $table->foreignId('nature_id')->constrained('natures')->onDelete('cascade');

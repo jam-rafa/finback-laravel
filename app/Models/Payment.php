@@ -16,11 +16,17 @@ class Payment extends Model
         'expiration_date',
         'movements_id',
         'payment_type_id',
+        'account_id'
     ];
 
     // Relacionamento com PaymentType
     public function paymentType()
     {
         return $this->belongsTo(PaymentType::class, 'payment_type_id');
+    }
+
+    public function account()
+    {
+        return $this->belongsTo(Account::class);
     }
 }

@@ -21,7 +21,7 @@ return new class extends Migration
             // Define as chaves estrangeiras
             $table->foreignId('movements_id')->constrained('movements')->onDelete('cascade');
             $table->foreignId('payment_type_id')->constrained('payment_types')->onDelete('cascade'); // Relação com payment_types
-            
+            $table->foreignId('account_id')->constrained('accounts')->onDelete('cascade');
             $table->timestamps(); // Cria as colunas 'created_at' e 'updated_at'
         });
     }

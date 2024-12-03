@@ -6,11 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Account extends Model
 {
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'nome',
         'numero_conta',
@@ -19,4 +14,12 @@ class Account extends Model
         'account_type',
         'status'
     ];
+
+    /**
+     * Relacionamento com a tabela 'movements'.
+     */
+    public function movements()
+    {
+        return $this->hasMany(Movement::class);
+    }
 }

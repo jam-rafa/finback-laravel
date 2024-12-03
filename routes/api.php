@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 
 
 use App\Http\Controllers\AccountCostCenterController;
+use App\Http\Controllers\Api\DashBoard\RevenueController;
 use App\Http\Controllers\MovementController;
 use App\Http\Controllers\NatureController;
 use App\Http\Controllers\NatureTypeController;
@@ -112,3 +113,5 @@ Route::prefix('event')->controller(EventController::class)->group(function () {
     Route::delete('/{id}', 'destroy'); // DELETE /cost-centers/{id}
 });
 
+
+Route::get('/dashboard/revenue', [RevenueController::class, 'index']);

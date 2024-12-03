@@ -13,7 +13,7 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('users')->insert([
+        DB::table('user')->insert([
             [
                 'username' => 'Rafael Carvalho',
                 'password' => Hash::make('12345'), // Criptografa a senha

@@ -69,7 +69,7 @@ class EventController extends Controller
                         'name' => $item['formaDePagamento']
                     ]);
                 }
-                echo('teste');
+                echo ('teste');
 
                 // Cria o movimento
                 $movement = Movement::create([

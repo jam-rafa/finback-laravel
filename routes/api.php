@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AccountCostCenterController;
 use App\Http\Controllers\Api\DashBoard\RevenueController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\MovementController;
 use App\Http\Controllers\NatureController;
 use App\Http\Controllers\NatureTypeController;
@@ -115,3 +116,8 @@ Route::prefix('event')->controller(EventController::class)->group(function () {
 
 
 Route::get('/dashboard/revenue', [RevenueController::class, 'index']);
+
+Route::prefix('login')->controller(LoginController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::post('/', 'store');
+});

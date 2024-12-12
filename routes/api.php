@@ -17,6 +17,7 @@ use App\Http\Controllers\PaymentTypeController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserAccountController;
 use App\Http\Controllers\UserController;
+use App\Http\Middleware\AuthMiddleware;
 
 Route::prefix('accounts')->controller(AccountController::class)->group(function () {
     Route::get('/', 'index');       // GET /accounts
@@ -115,9 +116,19 @@ Route::prefix('event')->controller(EventController::class)->group(function () {
 });
 
 
-Route::get('/dashboard/revenue', [RevenueController::class, 'index']);
+
+
+
+
+Route::middleware('authMiddleware')->group(function () {
+    Route::get('/dashboard/revenue', [RevenueController::class, 'index']);
+});
 
 Route::prefix('login')->controller(LoginController::class)->group(function () {
     Route::get('/', 'index');
     Route::post('/', 'store');
+});
+
+Route::middleware('auth:sanctum')->get('user', function (Request $request) {
+    return $request->user();
 });

@@ -4,9 +4,10 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class Auth
+class AuthMiddleware
 {
     /**
      * Handle an incoming request.
@@ -15,7 +16,13 @@ class Auth
      */
     public function handle(Request $request, Closure $next): Response
     {
-        
+        if (!Auth::check() || !$request->user()->currentAccessToken()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Token inválido ou não autenticado.',
+            ], 401);
+        }
+
         return $next($request);
     }
 }

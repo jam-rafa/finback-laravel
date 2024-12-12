@@ -23,7 +23,7 @@ class CostCenterSeeder extends Seeder
             ['name' => 'Cuidados Pessoais'],
             ['name' => 'Investimentos'],
             ['name' => 'Impostos'],
-            ['name' => 'DívidasDívidas'],
+            ['name' => 'Dívidas'],
             ['name' => 'Doações'],
         ];
 

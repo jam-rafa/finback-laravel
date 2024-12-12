@@ -3,42 +3,83 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
-    public function index(Request $request)
-    {
-        if (Auth::check()) {
-            die('true');
-        } else {
-            die('false');
-        }
+  /**
+   * Verifica se o usuário está autenticado.
+   */
+  public function index(Request $request)
+  {
+    $user = Auth::guard('sanctum')->user();
+
+    if ($user) {
+      return response()->json([
+        'message' => 'Token válido',
+        'valid' => true,
+        // 'user' => $user
+      ], 200);
+    } else {
+      return response()->json([
+        'message' => 'Token inválido ou expirado',
+        'valid' => false,
+
+      ], 401);
+    }
+  }
+
+  /**
+   * Realiza login e gera um token de acesso.
+   */
+  public function store(Request $request)
+  {
+    $credentials = $request->validate([
+      'email' => 'required|email',
+      'password' => 'required|string',
+    ]);
+
+    // Tentativa de autenticação
+    if (Auth::attempt($credentials)) {
+      $user = Auth::user(); // Recupera o usuário autenticado
+      // Cria um token pessoal para o usuário
+      $token = $user->createToken('user-token',  ['*'], now()->addMinutes(1));
+
+      return response()->json([
+        'success' => true,
+        'message' => 'Login realizado com sucesso.',
+        'token' => $token->plainTextToken, // Retorna o token gerado,
+      ], 200);
     }
 
-    public function store(Request $request)
-    {
-        try {
-            // Validação dos campos do request
-            $credentials = $request->validate([
-                'email' => 'required',
-                'password' => 'required|string',
-            ]);
+    return response()->json([
+      'success' => false,
+      'message' => 'Credenciais inválidas.',
+    ], 401);
+  }
+  public function destroy(Request $request)
+  {
+    $validatedData = $request->validate([
+      'id' => 'required|integer', // 'number' deve ser 'integer'
+    ]);
 
-            // Tentativa de autenticação
-            if (Auth::attempt($credentials)) {
-                return response()->json(['success' => true, 'message' => 'Login realizado com sucesso.'], 200);
-            }
-        } catch (\Exception $e) {
-            // Captura de erros inesperados
-            return response()->json([
-                'success' => false,
-                'message' => 'Ocorreu um erro ao tentar realizar o login.',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+    // Recupera o usuário autenticado
+    $user = $request->user();
+
+    // Verifica se o token existe e o remove
+    $deleted = $user->tokens()->where('id', $validatedData['id'])->delete();
+
+    if ($deleted) {
+      return response()->json([
+        'success' => true,
+        'message' => 'Token removido com sucesso.',
+      ], 200);
     }
+
+    return response()->json([
+      'success' => false,
+      'message' => 'Token não encontrado.',
+    ], 404);
+  }
 }

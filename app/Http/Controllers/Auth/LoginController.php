@@ -19,7 +19,6 @@ class LoginController extends Controller
       return response()->json([
         'message' => 'Token válido',
         'valid' => true,
-        // 'user' => $user
       ], 200);
     } else {
       return response()->json([
@@ -40,16 +39,18 @@ class LoginController extends Controller
       'password' => 'required|string',
     ]);
 
+    // $request -> session()->regenerate();
+
     // Tentativa de autenticação
     if (Auth::attempt($credentials)) {
       $user = Auth::user(); // Recupera o usuário autenticado
       // Cria um token pessoal para o usuário
-      $token = $user->createToken('user-token',  ['*'], now()->addMinutes(1));
+      $token = $user->createToken('user-token',  ['server:update'], now()->addHour(1));
 
       return response()->json([
         'success' => true,
         'message' => 'Login realizado com sucesso.',
-        'token' => $token->plainTextToken, // Retorna o token gerado,
+        'token' => $token->plainTextToken,
       ], 200);
     }
 

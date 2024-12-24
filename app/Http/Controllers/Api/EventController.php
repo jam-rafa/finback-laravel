@@ -14,25 +14,15 @@ use Illuminate\Http\Request;
 
 class EventController extends Controller
 {
-    public function index(Request $request)
-    {
-
-        // $users = Users::all();
-
-        // dd($users);
-        // return response()->json([
-        //     'message' => 'Dados recebidos',
-        //     'data' => $request->all()
-        // ]);
-    }
+    public function index(Request $request) {}
 
     public function store(Request $request)
     {
         try {
 
+            $account = Account::where('nome', $request['account_name'])->first();
+            $account_id = $account ? $account->id : null;
 
-
-            $account_id = 2;
 
             $data = $request->get('data');
             if (!is_array($data)) {

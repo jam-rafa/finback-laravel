@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             AccountSeeder::class,
             RoleSeeder::class,
             UserSeeder::class,
+            AccountUserSeeder::class,
             PaymentTypesSeeder::class,
             CostCenterSeeder::class
 

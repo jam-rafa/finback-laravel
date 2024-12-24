@@ -8,7 +8,11 @@ use Illuminate\Support\Facades\Route;
 
 
 use App\Http\Controllers\AccountCostCenterController;
+use App\Http\Controllers\Api\Accounts\AccountsController;
+use App\Http\Controllers\Api\DashBoard\CostCenterController as DashBoardCostCenterController;
 use App\Http\Controllers\Api\DashBoard\RevenueController;
+use App\Http\Controllers\Api\DashBoard\TopMovimentations;
+use App\Http\Controllers\Api\DashBoard\weekendGrowth;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\MovementController;
 use App\Http\Controllers\NatureController;
@@ -17,7 +21,6 @@ use App\Http\Controllers\PaymentTypeController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserAccountController;
 use App\Http\Controllers\UserController;
-use App\Http\Middleware\AuthMiddleware;
 
 Route::prefix('accounts')->controller(AccountController::class)->group(function () {
     Route::get('/', 'index');       // GET /accounts
@@ -117,12 +120,17 @@ Route::prefix('event')->controller(EventController::class)->group(function () {
 
 
 
-
-
-
-Route::middleware('authMiddleware')->group(function () {
-    Route::get('/dashboard/revenue', [RevenueController::class, 'index']);
+Route::middleware('auth:sanctum')->prefix('accounts')->group(function () {
+    Route::get('/', [AccountsController::class, 'index']);
 });
+
+Route::middleware('auth:sanctum')->prefix('dashboard')->group(function () {
+    Route::get('/revenue', [RevenueController::class, 'index']);
+    Route::get('/weekendGrowth', [weekendGrowth::class, 'index']);
+    Route::get('/costCenter', [DashBoardCostCenterController::class, 'index']);
+    Route::get('/topMovimentations', [TopMovimentations::class, 'index']);
+});
+
 
 Route::prefix('login')->controller(LoginController::class)->group(function () {
     Route::get('/', 'index');

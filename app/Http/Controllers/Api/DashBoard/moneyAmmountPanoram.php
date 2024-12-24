@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class moneyAmmountPanoram extends Controller
+class MoneyAmmountPanoram extends Controller
 {
     public function index(Request $request)
     {
@@ -28,21 +28,41 @@ class moneyAmmountPanoram extends Controller
         // Determina o agrupamento (dia ou mês) com base no intervalo
         $groupBy = $diffDays <= 30 ? 'DATE(pay.expiration_date)' : 'DATE_FORMAT(pay.expiration_date, "%Y-%m")';
 
-        // Consulta para obter os dados agregados
+        // Consulta para obter os dados agregados de entradas e saídas
         $results = DB::table('movements')
             ->join('payments as pay', 'movements.id', '=', 'pay.movements_id')
-            ->where('movements.moviment_type', '=', 'Saida')
             ->whereBetween('pay.expiration_date', [$startDate, $endDate])
             ->where('movements.account_id', '=', $accountId)
             ->selectRaw("
                 $groupBy as period,
+                movements.moviment_type,
                 SUM(pay.installment_value) as total_value
             ")
-            ->groupBy(DB::raw($groupBy))
-            ->orderBy(DB::raw($groupBy), 'DESC')
+            ->groupBy(DB::raw($groupBy), 'movements.moviment_type')
+            ->orderBy(DB::raw($groupBy), 'Asc')
             ->get();
 
-        // Retorna os resultados como JSON
-        return response()->json($results);
+        // Inicializa o saldo acumulado
+        $cumulativeRevenue = 0;
+
+        // Formatar o resultado para agrupar entradas e saídas por período
+        $formattedResults = $results->groupBy('period')->map(function ($items, $period) use (&$cumulativeRevenue) {
+            $entradas = $items->where('moviment_type', 'Entrada')->sum('total_value');
+            $saidas = $items->where('moviment_type', 'Saida')->sum('total_value');
+            $dailyRevenue = $entradas - $saidas;
+
+            // Atualiza o saldo acumulado
+            $cumulativeRevenue += $dailyRevenue;
+
+            return [
+                'period' => $period,
+                'entradas' => $entradas,
+                'saidas' => $saidas,
+                'revenue' => $cumulativeRevenue, // Usa o saldo acumulado
+            ];
+        })->values();
+
+        // Retorna os resultados formatados como JSON
+        return response()->json($formattedResults);
     }
 }

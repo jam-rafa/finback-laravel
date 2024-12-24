@@ -10,9 +10,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AccountCostCenterController;
 use App\Http\Controllers\Api\Accounts\AccountsController;
 use App\Http\Controllers\Api\DashBoard\CostCenterController as DashBoardCostCenterController;
+use App\Http\Controllers\Api\DashBoard\moneyAmmountPanoram;
 use App\Http\Controllers\Api\DashBoard\RevenueController;
 use App\Http\Controllers\Api\DashBoard\TopMovimentations;
 use App\Http\Controllers\Api\DashBoard\weekendGrowth;
+use App\Http\Controllers\Api\TimeLine\TimeLineController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\MovementController;
 use App\Http\Controllers\NatureController;
@@ -129,7 +131,13 @@ Route::middleware('auth:sanctum')->prefix('dashboard')->group(function () {
     Route::get('/weekendGrowth', [weekendGrowth::class, 'index']);
     Route::get('/costCenter', [DashBoardCostCenterController::class, 'index']);
     Route::get('/topMovimentations', [TopMovimentations::class, 'index']);
+    Route::get('/moneyAmmountPanoram', [moneyAmmountPanoram::class, 'index']);
 });
+
+Route::middleware('auth:sanctum')->prefix('time-line')->group(function () {
+    Route::get('/', [TimeLineController::class, 'index']);
+});
+
 
 
 Route::prefix('login')->controller(LoginController::class)->group(function () {

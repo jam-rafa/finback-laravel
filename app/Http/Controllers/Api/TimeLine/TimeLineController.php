@@ -30,6 +30,8 @@ class TimeLineController extends Controller
         $query = DB::table('movements')
             ->join('payments as pay', 'movements.id', '=', 'pay.movements_id')
             ->join('payment_types as pay_type', 'movements.payment_type_id', '=', 'pay_type.id')
+            ->join('natures', 'movements.nature_id', '=', 'natures.id')
+            ->join('cost_centers as cost', 'movements.cost_center_id', '=', 'cost.id')
             ->whereBetween('pay.expiration_date', [$startDate, $endDate]);
 
         // Adiciona o filtro por account_id, se enviado
@@ -43,11 +45,14 @@ class TimeLineController extends Controller
                 'movements.id',
                 'movements.name as movement_name',
                 'movements.installments',
+                'movements.moviment_type',
+                'natures.name as nature',
                 'pay.installment_value',
+                'cost.name as cost_center',
                 'pay.expiration_date',
                 'pay_type.name as payment_type_name'
             )
-            ->orderBy('pay.expiration_date', 'desc')
+            ->orderBy('pay.expiration_date')
             ->limit($limit)
             ->offset($offset)
             ->get();
@@ -57,7 +62,7 @@ class TimeLineController extends Controller
             return $item->expiration_date; // Agrupa pelo campo `expiration_date`
         })->map(function ($items, $day) {
             return [
-                'day' => $day,
+                'group' => $day,
                 'data' => $items->toArray(),
             ];
         })->values();

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('cost_centers', function (Blueprint $table) {
             $table->id(); // Cria a coluna 'id' como chave primária auto-incrementável
             $table->string('name')->unique(); // Cria a coluna 'name' (STRING)
+            // $table->string('icon'); // Cria a coluna 'name' (STRING)            
             $table->timestamps(); // Cria as colunas 'created_at' e 'updated_at'
         });
     }

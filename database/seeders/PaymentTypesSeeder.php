@@ -21,6 +21,7 @@ class PaymentTypesSeeder extends Seeder
             ['name' => 'Boleto Bancário', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Transferência Bancária', 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Aplicação Poupança', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'Não identificado', 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 }

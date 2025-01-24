@@ -12,6 +12,8 @@ class Account extends Model
         'agencia',
         'saldo',
         'account_type',
+        'account_group',
+        'bank',
         'status'
     ];
 

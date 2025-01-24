@@ -8,5 +8,5 @@ class CostCenter extends Model
 {
     //
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'icon'];
 }

@@ -14,11 +14,11 @@ class LoginController extends Controller
   public function index(Request $request)
   {
     $user = Auth::guard('sanctum')->user();
-
     if ($user) {
       return response()->json([
         'message' => 'Token válido',
         'valid' => true,
+        'user' => $user
       ], 200);
     } else {
       return response()->json([

@@ -19,6 +19,8 @@ return new class extends Migration
             $table->decimal('saldo', 15, 2)->default(0.00); // Cria a coluna 'saldo' como DECIMAL com precisão e valor padrão de 0.00
             $table->string('account_type'); // Cria a coluna 'account_type' (STRING) para tipo da conta
             $table->string('status')->default('ativa'); // Cria a coluna 'status' com valor padrão de 'ativa'
+            $table->string('account_group');
+            $table->string('bank');
             $table->timestamps(); // Cria as colunas 'created_at' e 'updated_at'
         });
     }

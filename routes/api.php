@@ -51,22 +51,6 @@ Route::prefix('users')->controller(UserController::class)->group(function () {
 });
 
 
-Route::prefix('cost-centers')->controller(CostCenterController::class)->group(function () {
-    Route::get('/', 'index');       // GET /cost-centers
-    Route::post('/', 'store');      // POST /cost-centers
-    Route::get('/{id}', 'show');    // GET /cost-centers/{id}
-    Route::put('/{id}', 'update');  // PUT /cost-centers/{id}
-    Route::delete('/{id}', 'destroy'); // DELETE /cost-centers/{id}
-});
-
-Route::prefix('natures')->controller(NatureController::class)->group(function () {
-    Route::get('/', 'index');       // GET /natures
-    Route::post('/', 'store');      // POST /natures
-    Route::get('/{id}', 'show');    // GET /natures/{id}
-    Route::put('/{id}', 'update');  // PUT /natures/{id}
-    Route::delete('/{id}', 'destroy'); // DELETE /natures/{id}
-});
-
 
 Route::prefix('payment-types')->controller(PaymentTypeController::class)->group(function () {
     Route::get('/', 'index');       // GET /payment-types
@@ -126,6 +110,12 @@ Route::middleware('auth:sanctum')->prefix('accounts')->group(function () {
     Route::get('/', [AccountsController::class, 'index']);
 });
 
+Route::middleware('auth:sanctum')->prefix('cost-centers')->controller(CostCenterController::class)->group(function () {
+    Route::get('/', 'index');       // GET /cost-centers
+    Route::put('/{id}', 'update');  // PUT /cost-centers/{id}
+    Route::delete('/{id}', 'destroy'); // DELETE /cost-centers/{id}
+});
+
 Route::middleware('auth:sanctum')->prefix('dashboard')->group(function () {
     Route::get('/revenue', [RevenueController::class, 'index']);
     Route::get('/weekendGrowth', [weekendGrowth::class, 'index']);
@@ -138,6 +128,14 @@ Route::middleware('auth:sanctum')->prefix('time-line')->group(function () {
     Route::get('/', [TimeLineController::class, 'index']);
 });
 
+
+Route::middleware('auth:sanctum')->prefix('natures')->controller(NatureController::class)->group(function () {
+    Route::get('/', 'index');       // GET /natures
+    Route::post('/', 'store');      // POST /natures
+    Route::get('/{id}', 'show');    // GET /natures/{id}
+    Route::put('/{id}', 'update');  // PUT /natures/{id}
+    Route::delete('/{id}', 'destroy'); // DELETE /natures/{id}
+});
 
 
 Route::prefix('login')->controller(LoginController::class)->group(function () {

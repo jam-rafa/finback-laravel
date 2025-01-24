@@ -15,7 +15,6 @@ class CostCenterController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'id' => 'required|integer' // ID obrigatório e deve ser um número inteiro
-
         ]);
 
         // Obtém os parâmetros do request
@@ -26,16 +25,16 @@ class CostCenterController extends Controller
         // Consulta para obter os 7 principais centros de custo por saída
         $results = DB::table('movements')
             ->join('cost_centers as cost', 'movements.cost_center_id', '=', 'cost.id')
-            ->join('payments as pay', 'movements.id', '=', 'pay.movements_id')
             ->select(
                 'cost.name',
-                DB::raw('SUM(pay.installment_value) AS total_spent')
+                DB::raw('SUM(movements.value) AS total_spent')
             )
-            ->whereBetween('pay.expiration_date', [$startDate, $endDate])
+            ->whereBetween('movements.date', [$startDate, $endDate])
             ->where('movements.moviment_type', '=', 'Saida') // Ajuste conforme a nomenclatura do seu banco
             ->where('movements.account_id', $accountId)
             ->groupBy('cost.name')
             ->orderByDesc('total_spent')
+            ->limit(7) // Retorna apenas os 7 principais
             ->get();
 
         // Retorna os resultados

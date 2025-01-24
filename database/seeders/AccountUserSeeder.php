@@ -22,6 +22,13 @@ class AccountUserSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
+
+            DB::table('account_user')->insert([
+                'user_id' => 2,
+                'account_id' => $accountId,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
         }
     }
 }

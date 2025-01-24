@@ -23,6 +23,14 @@ class UserSeeder extends Seeder
                 'cnpj' => null,
                 'role_id' => 1, // Certifique-se de que o role_id corresponde a um ID válido na tabela roles
             ],
+            [
+                'username' => 'yohana',
+                'password' => Hash::make('12345'), // Criptografa a senha
+                'email' => 'yohanasporto@gmail.com',
+                'cpf' => '000000000',
+                'cnpj' => null,
+                'role_id' => 1, // Certifique-se de que o role_id corresponde a um ID válido na tabela roles
+            ],
 
         ]);
     }

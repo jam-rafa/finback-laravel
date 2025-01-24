@@ -4,14 +4,25 @@ namespace App\Http\Controllers;
 
 use App\Models\Nature;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 
 class NatureController extends Controller
 {
     // Listar todas as natures
-    public function index()
+    public function index(Request $request)
     {
-        $natures = Nature::all();
-        return response()->json($natures, 200);
+        $request->validate([
+            'id' => 'required|integer', // ID é obrigatório e deve ser inteiro
+        ]);
+
+        $accountId = $request->input('id');
+
+        $natures = Nature::select('natures.id', 'natures.name')
+            ->join('account_natures', 'natures.id', '=', 'account_natures.nature_id')
+            ->where('account_natures.account_id', $accountId)
+            ->get();
+
+        return response()->json($natures);
     }
 
     // Criar uma nova nature

@@ -28,11 +28,10 @@ class TimeLineController extends Controller
 
         // Inicia a query
         $query = DB::table('movements')
-            ->join('payments as pay', 'movements.id', '=', 'pay.movements_id')
             ->join('payment_types as pay_type', 'movements.payment_type_id', '=', 'pay_type.id')
             ->join('natures', 'movements.nature_id', '=', 'natures.id')
             ->join('cost_centers as cost', 'movements.cost_center_id', '=', 'cost.id')
-            ->whereBetween('pay.expiration_date', [$startDate, $endDate]);
+            ->whereBetween('movements.date', [$startDate, $endDate]);
 
         // Adiciona o filtro por account_id, se enviado
         if (!is_null($accountId)) {
@@ -47,12 +46,12 @@ class TimeLineController extends Controller
                 'movements.installments',
                 'movements.moviment_type',
                 'natures.name as nature',
-                'pay.installment_value',
+                'movements.value as installment_value', // Substituído o campo `pay.installment_value`
                 'cost.name as cost_center',
-                'pay.expiration_date',
+                'movements.date as expiration_date', // Substituído o campo `pay.expiration_date`
                 'pay_type.name as payment_type_name'
             )
-            ->orderBy('pay.expiration_date')
+            ->orderBy('movements.date') // Ordenado pela data do movimento
             ->limit($limit)
             ->offset($offset)
             ->get();

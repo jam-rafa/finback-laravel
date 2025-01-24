@@ -4,11 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Account;
+use App\Models\AccountCostCenter;
+use App\Models\AccountNature;
 use App\Models\CostCenter;
 use App\Models\Movement;
 use App\Models\Nature;
 use App\Models\NatureType;
-use App\Models\Payment;
 use App\Models\PaymentType;
 use Illuminate\Http\Request;
 
@@ -19,31 +20,47 @@ class EventController extends Controller
     public function store(Request $request)
     {
         try {
-
             $account = Account::where('nome', $request['account_name'])->first();
             $account_id = $account ? $account->id : null;
 
-
             $data = $request->get('data');
             if (!is_array($data)) {
-                return response()->json(['message' => $request['data']], 400);
+                return response()->json(['message' => $request['account_name']], 400);
             }
 
             foreach ($request['data'] as $item) {
                 // Tenta encontrar ou criar o centro de custo
-                $costCenter = CostCenter::where('name', $item['centroDeCusto'])->first();
-                if (!$costCenter) {
-                    $costCenter = CostCenter::create([
-                        'name' => $item['centroDeCusto']
+                $costCenter = CostCenter::firstOrCreate(
+                    ['name' => $item['centroDeCusto']], // Condição para verificar se já existe
+                    ['icon' => 'ti-bell'] // Valores padrão para criar se não existir
+                );
+
+                $existingAssociation = AccountCostCenter::where('account_id', $account_id)
+                    ->where('cost_center_id', $costCenter->id)
+                    ->exists();
+
+                if (!$existingAssociation) {
+                    AccountCostCenter::create([
+                        'account_id' => $account_id,
+                        'cost_center_id' => $costCenter->id
                     ]);
                 }
 
-                $nature = Nature::where('name', $item['natureza'])->first();
-                if (!$nature) {
-                    $nature = Nature::create([
-                        'name' => $item['natureza']
+                $nature = Nature::firstOrCreate([
+                    'name' => $item['natureza']
+                ]);
+
+                $existingAccNature = AccountNature::where('account_id', $account_id)
+                    ->where('nature_id', $nature->id)
+                    ->exists();
+
+                if (!$existingAccNature) {
+                    AccountNature::create([
+                        'account_id' => $account_id,
+                        'nature_id' => $nature->id
                     ]);
                 }
+
 
                 $nature_type = NatureType::where('name', $item['tipo_natureza'])->first();
                 if (!$nature_type) {
@@ -59,36 +76,25 @@ class EventController extends Controller
                         'name' => $item['formaDePagamento']
                     ]);
                 }
-                echo ('teste');
 
-                // Cria o movimento
-                $movement = Movement::create([
-                    'name' => $item['nomeEmpresa'],
-                    'date' => $item['data'],
-                    'cost_type' => $item['fixoVariavel'],
-                    'value' => $item['valor'],
-                    'moviment_type' => $item['moviment_type'],
-                    'installments' => $item['payment']['installments'],
-                    'account_id' => $account_id,
-                    'nature_id' => $nature->id,
-                    'payment_type_id' => $paymentType->id,
-                    'cost_center_id' => $costCenter->id,
-                ]);
-
-                // Verifica se o pagamento é parcelado
                 // Verifica se o pagamento é parcelado
                 $installments = $item['payment']['installments'] ?? 1; // Default para 1 parcela
                 $expirationDate = $item['data']; // Usa a data do movimento como base
-                // Cria as parcelas
+
+                // Cria as parcelas ou o movimento único
                 for ($i = 1; $i <= $installments; $i++) {
-                    Payment::create([
-                        'status' => 'pendente', // Define o status inicial
-                        'installment' => $i, // Número da parcela
-                        'installment_value' => $item['payment']['installment_value'] / $installments, // Usa o valor da parcela do payload
-                        'expiration_date' => \Carbon\Carbon::parse($expirationDate)->addMonths($i - 1), // Incrementa o mês para cada parcela
-                        'movements_id' => $movement->id, // Relaciona ao movimento criado
+                    Movement::create([
+                        'name' => $item['nomeEmpresa'],
+                        'date' => \Carbon\Carbon::parse($expirationDate)->addMonths($i - 1), // Incrementa o mês para cada parcela
+                        'cost_type' => $item['fixoVariavel'],
+                        'value' => $item['payment']['installment_value'] / $installments, // Valor por parcela
+                        'moviment_type' => $item['moviment_type'],
+                        'installments' => $i, // Número total de parcelas
+                        'current_installment' => $i, // Parcela atual
                         'account_id' => $account_id,
-                        'payment_type_id' => $paymentType->id, // Relaciona ao tipo de pagamento
+                        'nature_id' => $nature->id,
+                        'payment_type_id' => $paymentType->id,
+                        'cost_center_id' => $costCenter->id,
                     ]);
                 }
             }

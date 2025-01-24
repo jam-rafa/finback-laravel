@@ -22,30 +22,36 @@ class TopMovimentations extends Controller
         $endDate = $request->input('end_date');
         $accountId = $request->input('id');
 
+        // Top 7 entradas
         $top_entradas = DB::table('movements')
-            ->join('cost_centers as cost', 'movements.cost_center_id', '=', 'cost.id')
-            ->join('payments as pay', 'movements.id', '=', 'pay.movements_id')
-            ->select('movements.name', 'cost.name as cost_center_name', DB::raw('SUM(pay.installment_value) AS total_value'))
-            ->whereBetween('pay.expiration_date', [$startDate, $endDate])
-            ->where('movements.moviment_type', '=', 'Entrada')
-            ->where('movements.account_id', $accountId)
-            ->groupBy('movements.name', 'cost.name')
-            ->orderByDesc('total_value')
-            ->limit(7)
+            ->join('cost_centers as cost', 'movements.cost_center_id', '=', 'cost.id') // Relaciona com os centros de custo
+            ->select(
+                'movements.name',
+                'cost.name as cost_center_name',
+                DB::raw('SUM(movements.value) AS total_value') // Soma dos valores das entradas
+            )
+            ->whereBetween('movements.date', [$startDate, $endDate]) // Filtro por data
+            ->where('movements.moviment_type', '=', 'Entrada') // Filtro por tipo de movimentação
+            ->where('movements.account_id', $accountId) // Filtro pelo ID da conta
+            ->groupBy('movements.name', 'cost.name') // Agrupamento por nome e centro de custo
+            ->orderByDesc('total_value') // Ordenação decrescente pelo valor total
+            ->limit(7) // Retorna apenas os 7 maiores valores
             ->get();
-
 
         // Top 7 saídas
         $top_saidas = DB::table('movements')
-            ->join('cost_centers as cost', 'movements.cost_center_id', '=', 'cost.id')
-            ->join('payments as pay', 'movements.id', '=', 'pay.movements_id')
-            ->select('movements.name', 'cost.name as cost_center_name', DB::raw('SUM(pay.installment_value) AS total_value'))
-            ->whereBetween('pay.expiration_date', [$startDate, $endDate])
-            ->where('movements.moviment_type', '=', 'saida')
-            ->where('movements.account_id', $accountId)
-            ->groupBy('movements.name', 'cost.name')
-            ->orderByDesc('total_value')
-            ->limit(7)
+            ->join('cost_centers as cost', 'movements.cost_center_id', '=', 'cost.id') // Relaciona com os centros de custo
+            ->select(
+                'movements.name',
+                'cost.name as cost_center_name',
+                DB::raw('SUM(movements.value) AS total_value') // Soma dos valores das saídas
+            )
+            ->whereBetween('movements.date', [$startDate, $endDate]) // Filtro por data
+            ->where('movements.moviment_type', '=', 'Saída') // Filtro por tipo de movimentação
+            ->where('movements.account_id', $accountId) // Filtro pelo ID da conta
+            ->groupBy('movements.name', 'cost.name') // Agrupamento por nome e centro de custo
+            ->orderByDesc('total_value') // Ordenação decrescente pelo valor total
+            ->limit(7) // Retorna apenas os 7 maiores valores
             ->get();
 
         // Retorna os resultados em formato JSON

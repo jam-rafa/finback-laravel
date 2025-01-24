@@ -26,17 +26,16 @@ class MoneyAmmountPanoram extends Controller
         $diffDays = (new \DateTime($startDate))->diff(new \DateTime($endDate))->days;
 
         // Determina o agrupamento (dia ou mês) com base no intervalo
-        $groupBy = $diffDays <= 30 ? 'DATE(pay.expiration_date)' : 'DATE_FORMAT(pay.expiration_date, "%Y-%m")';
+        $groupBy = $diffDays <= 30 ? 'DATE(movements.date)' : 'DATE_FORMAT(movements.date, "%Y-%m")';
 
         // Consulta para obter os dados agregados de entradas e saídas
         $results = DB::table('movements')
-            ->join('payments as pay', 'movements.id', '=', 'pay.movements_id')
-            ->whereBetween('pay.expiration_date', [$startDate, $endDate])
+            ->whereBetween('movements.date', [$startDate, $endDate])
             ->where('movements.account_id', '=', $accountId)
             ->selectRaw("
                 $groupBy as period,
                 movements.moviment_type,
-                SUM(pay.installment_value) as total_value
+                SUM(movements.value) as total_value
             ")
             ->groupBy(DB::raw($groupBy), 'movements.moviment_type')
             ->orderBy(DB::raw($groupBy), 'Asc')

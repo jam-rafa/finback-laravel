@@ -10,27 +10,27 @@ class CostCenterController extends Controller
     /**
      * Lista todos os centros de custo.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Obtém todos os registros de centros de custo
-        $costCenters = CostCenter::all();
 
-        // Retorna uma resposta com todos os centros de custo (ou exibe em uma view)
+        $request->validate([
+            'id' => 'required|integer', // ID é obrigatório e deve ser inteiro
+        ]);
+    
+        // Obtém o ID da conta a partir do request
+        $accountId = $request->input('id');
+    
+        // Executa a consulta utilizando Eloquent
+        $costCenters = CostCenter::select('cost_centers.name', 'cost_centers.icon', 'cost_centers.id')
+            ->join('account_cost_centers', 'cost_centers.id', '=', 'account_cost_centers.cost_center_id')
+            ->where('account_cost_centers.account_id', $accountId)
+            ->orderBy('cost_centers.name')
+            ->get();
+    
+        // Retorna os resultados em formato JSON
         return response()->json($costCenters);
     }
 
-    /**
-     * Exibe o formulário de criação (opcional para APIs).
-     */
-    public function create()
-    {
-        // Normalmente usado para exibir um formulário em aplicações web
-        // Em APIs, esse método geralmente não é necessário
-    }
-
-    /**
-     * Armazena um novo centro de custo.
-     */
     public function store(Request $request)
     {
         // Valida os dados recebidos
@@ -47,26 +47,6 @@ class CostCenterController extends Controller
         return response()->json($costCenter, 201);
     }
 
-    /**
-     * Exibe um centro de custo específico.
-     */
-    public function show($id)
-    {
-        // Busca o centro de custo pelo ID
-        $costCenter = CostCenter::findOrFail($id);
-
-        // Retorna o centro de custo encontrado
-        return response()->json($costCenter);
-    }
-
-    /**
-     * Exibe o formulário de edição (opcional para APIs).
-     */
-    public function edit($id)
-    {
-        // Normalmente usado para exibir um formulário em aplicações web
-        // Em APIs, esse método geralmente não é necessário
-    }
 
     /**
      * Atualiza um centro de custo específico.

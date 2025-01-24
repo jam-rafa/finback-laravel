@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cost_centers', function (Blueprint $table) {
+        Schema::create('account_natures', function (Blueprint $table) {
             $table->id(); // Cria a coluna 'id' como chave primária auto-incrementável
-            $table->string('name')->unique(); // Cria a coluna 'name' (STRING)
-            $table->string('icon')->default('ti-bell'); // Cria a coluna 'name' (STRING)            
+            // Define as chaves estrangeiras para 'account_id' e 'cost_center_id'
+            $table->foreignId('account_id')->constrained('accounts')->onDelete('cascade');
+            $table->foreignId('nature_id')->constrained('natures')->onDelete('cascade');
+
             $table->timestamps(); // Cria as colunas 'created_at' e 'updated_at'
         });
     }
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cost_centers');
+        Schema::dropIfExists('account_natures');
     }
 };

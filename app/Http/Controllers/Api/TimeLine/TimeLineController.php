@@ -12,19 +12,35 @@ class TimeLineController extends Controller
     {
         // Validação dos parâmetros recebidos
         $request->validate([
-            'start_date' => 'required|date', // Data inicial obrigatória
-            'end_date' => 'required|date|after_or_equal:start_date', // Data final obrigatória
-            'id' => 'sometimes|integer', // ID opcional
-            'limit' => 'sometimes|integer|min:1', // Limite de registros por página
-            'offset' => 'sometimes|integer|min:0', // Offset para paginação
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'id' => 'sometimes|integer',
+            'limit' => 'sometimes|integer|min:1',
+            'offset' => 'sometimes|integer|min:0',
+            'cost_centers' => 'sometimes',
+            'natures' => 'sometimes',
+            'group' => 'sometimes', // Deve ser uma lista
         ]);
 
         // Obtendo os parâmetros
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
         $accountId = $request->input('id');
-        $limit = $request->input('limit', 10); // Padrão para 10 registros
-        $offset = $request->input('offset', 0); // Padrão para offset 0
+        $limit = $request->input('limit', 10);
+        $offset = $request->input('offset', 0);
+        $costCenters = $request->input('cost_centers');
+        $natures = $request->input('natures');
+        $groupFields = $request->input('group', ['date']); // Padrão para agrupar por data
+
+        // Decodificando o parâmetro group se for um JSON
+        if (!empty($groupFields) && is_string($groupFields)) {
+            $groupFields = json_decode($groupFields, true);
+        }
+
+        // Garantindo que groupFields seja sempre um array
+        if (!is_array($groupFields) || empty($groupFields)) {
+            $groupFields = ['date']; // Fallback para 'date' se inválido
+        }
 
         // Inicia a query
         $query = DB::table('movements')
@@ -38,6 +54,24 @@ class TimeLineController extends Controller
             $query->where('movements.account_id', '=', $accountId);
         }
 
+        if (!empty($costCenters)) {
+            if (is_string($costCenters)) {
+                $costCenters = json_decode($costCenters, true);
+            }
+            if (is_array($costCenters) && count($costCenters) > 0) {
+                $query->whereIn('movements.cost_center_id', $costCenters);
+            }
+        }
+
+        if (!empty($natures)) {
+            if (is_string($natures)) {
+                $natures = json_decode($natures, true);
+            }
+            if (is_array($natures) && count($natures) > 0) {
+                $query->whereIn('movements.nature_id', $natures);
+            }
+        }
+
         // Finaliza a query
         $results = $query
             ->select(
@@ -46,23 +80,66 @@ class TimeLineController extends Controller
                 'movements.installments',
                 'movements.moviment_type',
                 'natures.name as nature',
-                'movements.value as installment_value', // Substituído o campo `pay.installment_value`
+                'movements.value as installment_value',
                 'cost.name as cost_center',
-                'movements.date as expiration_date', // Substituído o campo `pay.expiration_date`
+                'movements.date as expiration_date',
                 'pay_type.name as payment_type_name'
             )
-            ->orderBy('movements.date') // Ordenado pela data do movimento
+            ->orderBy('movements.date')
             ->limit($limit)
             ->offset($offset)
             ->get();
 
-        // Transformando o resultado em um array onde as chaves são os dias
-        $groupedResults = $results->groupBy(function ($item) {
-            return $item->expiration_date; // Agrupa pelo campo `expiration_date`
-        })->map(function ($items, $day) {
+        // Função para obter o valor do agrupamento dinâmico
+        $groupedResults = $results->groupBy(function ($item) use ($groupFields) {
+            $groupKeys = [];
+            foreach ($groupFields as $field) {
+                switch ($field) {
+                    case 'cost_center':
+                        $groupKeys[] = [
+                            'field' => 'Centro de custo',
+                            'value' => $item->cost_center
+                        ];
+                        break;
+                    case 'nature':
+                        $groupKeys[] = [
+                            'field' => 'Natureza',
+                            'value' => $item->nature
+                        ];
+                        break;
+                    case 'moviment_type':
+                        $groupKeys[] = [
+                            'field' => 'movimento de',
+                            'value' => $item->moviment_type
+                        ];
+                        break;
+                    case 'date':
+                        $groupKeys[] = [
+                            'field' => 'Data',
+                            'value' => $item->expiration_date
+                        ];
+                        break;
+                }
+            }
+
+            // Gera uma string de agrupamento que inclui o campo e o valor
+            return implode('|', array_map(function ($key) {
+                return "{$key['field']}:{$key['value']}";
+            }, $groupKeys));
+        })->map(function ($items, $group) {
+            // Divide o agrupamento de volta em arrays de 'field' e 'value'
+            $fields = explode('|', $group);
+            $formattedGroup = array_map(function ($field) {
+                [$fieldName, $value] = explode(':', $field);
+                return [
+                    'field' => $fieldName,
+                    'value' => $value
+                ];
+            }, $fields);
+
             return [
-                'group' => $day,
-                'data' => $items->toArray(),
+                'group' => $formattedGroup, // Campo e valor para cada grupo
+                'data' => $items->toArray(), // Dados associados ao grupo
             ];
         })->values();
 

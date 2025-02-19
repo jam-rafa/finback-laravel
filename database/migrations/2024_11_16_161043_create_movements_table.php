@@ -24,6 +24,7 @@ return new class extends Migration
             $table->foreignId('nature_id')->constrained('natures')->onDelete('cascade');
             $table->foreignId('payment_type_id')->constrained('payment_types')->onDelete('cascade');
             $table->foreignId('cost_center_id')->constrained('cost_centers')->onDelete('cascade');
+            $table->foreignId('entities_id')->constrained('entities')->onDelete('cascade');
             
             $table->timestamps(); // Cria as colunas 'created_at' e 'updated_at'
         });

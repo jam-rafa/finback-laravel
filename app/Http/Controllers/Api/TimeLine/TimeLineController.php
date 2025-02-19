@@ -18,8 +18,9 @@ class TimeLineController extends Controller
             'limit' => 'sometimes|integer|min:1',
             'offset' => 'sometimes|integer|min:0',
             'cost_centers' => 'sometimes',
+            'entities' => 'sometimes',
             'natures' => 'sometimes',
-            'group' => 'sometimes', // Deve ser uma lista
+            'group' => 'sometimes', 
         ]);
 
         // Obtendo os parâmetros
@@ -30,7 +31,8 @@ class TimeLineController extends Controller
         $offset = $request->input('offset', 0);
         $costCenters = $request->input('cost_centers');
         $natures = $request->input('natures');
-        $groupFields = $request->input('group', ['date']); // Padrão para agrupar por data
+        $entities = $request->input('entities');
+        $groupFields = $request->input('group', ['date']); 
 
         // Decodificando o parâmetro group se for um JSON
         if (!empty($groupFields) && is_string($groupFields)) {
@@ -71,6 +73,17 @@ class TimeLineController extends Controller
                 $query->whereIn('movements.nature_id', $natures);
             }
         }
+
+
+        if (!empty($entities)) {
+            if (is_string($entities)) {
+                $entities = json_decode($entities, true);
+            }
+            if (is_array($entities) && count($entities) > 0) {
+                $query->whereIn('movements.entities_id', $entities);
+            }
+        }
+
 
         // Finaliza a query
         $results = $query

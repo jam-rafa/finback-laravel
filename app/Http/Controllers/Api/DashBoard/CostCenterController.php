@@ -22,7 +22,7 @@ class CostCenterController extends Controller
         $endDate = $request->input('end_date');
         $accountId = $request->input('id');
 
-        // Consulta para obter os 7 principais centros de custo por saída
+        // Consulta para obter os centros de custo por saída
         $results = DB::table('movements')
             ->join('cost_centers as cost', 'movements.cost_center_id', '=', 'cost.id')
             ->select(
@@ -34,10 +34,21 @@ class CostCenterController extends Controller
             ->where('movements.account_id', $accountId)
             ->groupBy('cost.name')
             ->orderByDesc('total_spent')
-            ->limit(7) // Retorna apenas os 7 principais
             ->get();
 
+        // Separando os 7 principais e somando os demais como "Outros"
+        $top7 = $results->take(6);
+        $othersTotal = $results->skip(6)->sum('total_spent');
+
+        // Se houver mais de 6 centros de custo, adiciona "Outros"
+        if ($results->count() > 6) {
+            $top7->push((object) [
+                'name' => 'Outros',
+                'total_spent' => $othersTotal
+            ]);
+        }
+
         // Retorna os resultados
-        return response()->json($results);
+        return response()->json($top7);
     }
 }

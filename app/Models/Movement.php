@@ -19,8 +19,14 @@ class Movement extends Model
         'nature_id',
         'payment_type_id',
         'cost_center_id',
-        'account_id'
+        'account_id',
+        'entities_id'
     ];
+
+    public function events()
+    {
+        return $this->belongsToMany(Event::class, 'movements_events')->withPivot('ent_value');
+    }
 
     /**
      * Relacionamento com a tabela 'accounts'.
@@ -52,5 +58,10 @@ class Movement extends Model
     public function costCenter()
     {
         return $this->belongsTo(CostCenter::class);
+    }
+
+    public function entities()
+    {
+        return $this->belongsTo(Entities::class);
     }
 }

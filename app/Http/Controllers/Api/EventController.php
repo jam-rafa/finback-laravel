@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\AccountCostCenter;
+use App\Models\AccountEntities;
 use App\Models\AccountNature;
 use App\Models\CostCenter;
+use App\Models\Entities;
 use App\Models\Movement;
 use App\Models\Nature;
 use App\Models\NatureType;
@@ -61,6 +63,22 @@ class EventController extends Controller
                     ]);
                 }
 
+                $entities = Entities::firstOrCreate([
+                    'name' => $item['nomeEmpresa'],
+                ]);
+
+                $existingAccEntities = AccountEntities::where('account_id', $account_id)
+                    ->where('entities_id', $entities->id)
+                    ->exists();
+
+                if (!$existingAccEntities) {
+                    AccountEntities::create([
+                        'account_id' => $account_id,
+                        'entities_id' => $entities->id
+                    ]);
+                }
+
+
 
                 $nature_type = NatureType::where('name', $item['tipo_natureza'])->first();
                 if (!$nature_type) {
@@ -95,6 +113,7 @@ class EventController extends Controller
                         'nature_id' => $nature->id,
                         'payment_type_id' => $paymentType->id,
                         'cost_center_id' => $costCenter->id,
+                        'entities_id' => $entities->id
                     ]);
                 }
             }
